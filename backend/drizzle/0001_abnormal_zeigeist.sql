@@ -1,0 +1,1 @@
+ALTER TABLE `ads` MODIFY COLUMN `raw_html` longtext;

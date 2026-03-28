@@ -1,1 +1,0 @@
-ALTER TABLE `ads` RENAME COLUMN `close_date` TO `date_closed`;

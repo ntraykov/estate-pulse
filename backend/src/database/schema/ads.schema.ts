@@ -1,46 +1,75 @@
+import { longtext } from 'drizzle-orm/mysql-core';
 import {
-  mysqlTable,
+  bigint,
+  boolean,
+  decimal,
+  index,
   int,
-  double,
-  varchar,
+  json,
+  mysqlTable,
   timestamp,
-  text,
+  uniqueIndex,
+  varchar,
 } from 'drizzle-orm/mysql-core';
-import { sql } from 'drizzle-orm';
-import { settlements } from './settlements.schema';
-import { AdvertiserType } from 'src/ads/enums/advertiser-type.enum';
-import { OwnershipType } from 'src/ads/enums/ownership-type.enum';
-import { mysqlEnum } from 'drizzle-orm/mysql-core';
-import { AdType } from 'src/ads/enums/ad-type.enum';
 
-export const ads = mysqlTable('ads', {
-  id: int('id').autoincrement().primaryKey(),
-  settlementId: int('settlement_id')
-    .notNull()
-    .references(() => settlements.id, { onDelete: 'cascade' }),
-  adId: int('ad_id').unique().notNull(),
-  url: varchar('url', { length: 255 }).notNull(),
-  type: mysqlEnum('type', [AdType.SALE, AdType.RENT]).notNull(),
-  advertiserType: mysqlEnum('advertiser_type', [
-    AdvertiserType.PRIVATE,
-    AdvertiserType.AGENCY,
-  ]).notNull(),
-  ownershipType: mysqlEnum('ownership_type', [
-    OwnershipType.FULL,
-    OwnershipType.JOINT,
-  ]),
-  area: double('area').notNull(),
-  price: double('price').notNull(),
-  rooms: int('rooms').notNull(),
-  floor: varchar('floor', { length: 10 }).notNull(),
-  czynsz: int('czynsz'),
-  address: varchar('address', { length: 255 }),
-  description: text('description'),
-  dateClosed: timestamp('date_closed'),
-  createdAt: timestamp('created_at')
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp('updated_at')
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
+export const ads = mysqlTable(
+  'ads',
+  {
+    id: bigint('id', { mode: 'number', unsigned: true })
+      .autoincrement()
+      .primaryKey(),
+
+    adId: varchar('ad_id', { length: 100 }).notNull(),
+
+    url: varchar('url', { length: 500 }).notNull(),
+
+    settlement: varchar('settlement', { length: 45 }).notNull(),
+
+    adType: varchar('ad_type', { length: 30 }).notNull(),
+    propertyType: varchar('property_type', { length: 30 }).notNull(),
+
+    price: int('price', { unsigned: true }).notNull(),
+
+    area: decimal('area', { precision: 10, scale: 2 }), // !!!
+
+    rooms: int('rooms', { unsigned: true }),
+
+    address: varchar('address', { length: 500 }),
+    latitude: decimal('latitude', { precision: 10, scale: 7 }),
+    longitude: decimal('longitude', { precision: 10, scale: 7 }),
+
+    firstSeenAt: timestamp('first_seen_at').notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at').notNull().defaultNow(),
+    disappearedAt: timestamp('disappeared_at'),
+
+    isActive: boolean('is_active').default(true),
+
+    rawDetailsJson: json('raw_details_json'),
+    rawScrapedJson: json('raw_scraped_json'),
+
+    rawHtml: longtext('raw_html'),
+
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+  },
+  (table) => ({
+    adIdUnique: uniqueIndex('ads_ad_id_unique').on(table.adId),
+
+    settlementIdx: index('ads_settlement_idx').on(table.settlement),
+
+    adTypeIdx: index('ads_ad_type_idx').on(table.adType),
+    propertyTypeIdx: index('ads_property_type_idx').on(table.propertyType),
+
+    isActiveIdx: index('ads_is_active_idx').on(table.isActive),
+
+    firstSeenAtIdx: index('ads_first_seen_at_idx').on(table.firstSeenAt),
+    lastSeenAtIdx: index('ads_last_seen_at_idx').on(table.lastSeenAt),
+    disappearedAtIdx: index('ads_disappeared_at_idx').on(table.disappearedAt),
+
+    priceIdx: index('ads_price_idx').on(table.price),
+    areaIdx: index('ads_area_idx').on(table.area),
+
+    latitudeIdx: index('ads_latitude_idx').on(table.latitude),
+    longitudeIdx: index('ads_longitude_idx').on(table.longitude),
+  }),
+);

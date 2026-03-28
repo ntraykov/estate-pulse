@@ -1,71 +1,75 @@
 import {
-  IsIn,
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
-  Validate,
+  MaxLength,
+  Min,
 } from 'class-validator';
-import { OwnershipType } from '../enums/ownership-type.enum';
-import { AdvertiserType } from '../enums/advertiser-type.enum';
-import { AdType } from '../enums/ad-type.enum';
-import { AdsMustBeUniqueValidator } from '../validators/ads-must-be-unique.validator';
 
 export class CreateAdDto {
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
-  settlementId: number;
-
-  @IsInt()
-  @IsNotEmpty()
-  @Validate(AdsMustBeUniqueValidator)
-  adId: number;
+  @MaxLength(100)
+  adId: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(500)
   url: string;
 
   @IsString()
   @IsNotEmpty()
-  @IsIn([AdType.SALE, AdType.RENT])
-  type: AdType;
+  @MaxLength(45)
+  settlement: string;
 
   @IsString()
   @IsNotEmpty()
-  @IsIn([AdvertiserType.PRIVATE, AdvertiserType.AGENCY])
-  advertiserType: AdvertiserType;
+  @MaxLength(30)
+  adType: string;
 
   @IsString()
   @IsNotEmpty()
-  @IsIn([OwnershipType.FULL, OwnershipType.JOINT])
-  ownershipType: OwnershipType;
-
-  @IsNumber()
-  @IsNotEmpty()
-  area: number;
+  @MaxLength(30)
+  propertyType: string;
 
   @IsNumber()
   @IsNotEmpty()
   price: number;
 
   @IsNumber()
-  @IsNotEmpty()
-  rooms: number;
+  @IsOptional()
+  area?: number;
+
+  @IsInt()
+  @IsOptional()
+  rooms?: number;
 
   @IsString()
-  @IsNotEmpty()
-  floor: string;
+  @IsOptional()
+  @MaxLength(500)
+  address?: string;
 
   @IsNumber()
   @IsOptional()
-  czynsz: number;
+  latitude?: number;
+
+  @IsNumber()
+  @IsOptional()
+  longitude?: number;
+
+  @IsObject()
+  @IsOptional()
+  rawDetailsJson?: Record<string, unknown>;
+
+  @IsObject()
+  @IsOptional()
+  rawScrapedJson?: Record<string, unknown>;
 
   @IsString()
   @IsOptional()
-  address: string;
-
-  @IsString()
-  @IsNotEmpty()
-  description: string;
+  rawHtml?: string;
 }

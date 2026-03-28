@@ -1,19 +1,24 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { AdsController } from './ads.controller';
 import { AdsService } from './services/ads.service';
 import { AdsQueries } from './queries/ads.queries';
-import { AdsMustBeUniqueValidator } from './validators/ads-must-be-unique.validator';
 import { AdsProcessingQueueUrlMustBeUniqueValidator } from './validators/ads-processing-queue-url-must-be-unique.validator';
+import { AdsProcessingQueueQueries } from './queries/ads-processing-queue.queries';
+import { AdsProcessorService } from './services/ads-processor.service';
+import { ProcessAdsCommand } from './cli/commands/process-ads.command';
+import { AdScraperService } from './services/ad-scraper.service';
 
 @Module({
-  imports: [HttpModule],
+  imports: [],
   controllers: [AdsController],
   providers: [
     AdsService,
+    AdsProcessorService,
     AdsQueries,
-    AdsMustBeUniqueValidator,
+    AdsProcessingQueueQueries,
     AdsProcessingQueueUrlMustBeUniqueValidator,
+    ProcessAdsCommand,
+    AdScraperService,
   ],
 })
 export class AdsModule {}

@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "5da768f3-244d-4f98-8e3e-7604c0676bd3",
-  "prevId": "c173423e-5c22-41dd-8439-9cc687ff7b9d",
+  "id": "bae7d6d9-1c29-473d-b745-484e1273e2a4",
+  "prevId": "ee8e164d-a52a-4652-933e-6ddedde2de80",
   "tables": {
-    "ads": {
-      "name": "ads",
+    "ads_processing_queue": {
+      "name": "ads_processing_queue",
       "columns": {
         "id": {
           "name": "id",
@@ -14,100 +14,169 @@
           "notNull": true,
           "autoincrement": true
         },
-        "settlement_id": {
-          "name": "settlement_id",
-          "type": "int",
+        "url": {
+          "name": "url",
+          "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ads_processing_queue_id": {
+          "name": "ads_processing_queue_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "ads_processing_queue_url_unique": {
+          "name": "ads_processing_queue_url_unique",
+          "columns": [
+            "url"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "ads": {
+      "name": "ads",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
         },
         "ad_id": {
           "name": "ad_id",
-          "type": "int",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "url": {
           "name": "url",
-          "type": "varchar(255)",
+          "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
-          "type": "enum('sale','rent')",
+        "settlement": {
+          "name": "settlement",
+          "type": "varchar(45)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "advertiser_type": {
-          "name": "advertiser_type",
-          "type": "enum('private','agency')",
+        "ad_type": {
+          "name": "ad_type",
+          "type": "varchar(30)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "ownership_type": {
-          "name": "ownership_type",
-          "type": "enum('full','joint')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "area": {
-          "name": "area",
-          "type": "double",
+        "property_type": {
+          "name": "property_type",
+          "type": "varchar(30)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "price": {
           "name": "price",
-          "type": "double",
+          "type": "int unsigned",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "area": {
+          "name": "area",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "rooms": {
           "name": "rooms",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "floor": {
-          "name": "floor",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "czynsz": {
-          "name": "czynsz",
-          "type": "int",
+          "type": "int unsigned",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "address": {
           "name": "address",
-          "type": "varchar(255)",
+          "type": "varchar(500)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "description": {
-          "name": "description",
-          "type": "text",
+        "latitude": {
+          "name": "latitude",
+          "type": "decimal(10,7)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "close_date": {
-          "name": "close_date",
+        "longitude": {
+          "name": "longitude",
+          "type": "decimal(10,7)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "first_seen_at": {
+          "name": "first_seen_at",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "disappeared_at": {
+          "name": "disappeared_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": true
+        },
+        "raw_details_json": {
+          "name": "raw_details_json",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "raw_scraped_json": {
+          "name": "raw_scraped_json",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "raw_html": {
+          "name": "raw_html",
+          "type": "longtext",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -118,7 +187,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(now())"
         },
         "updated_at": {
           "name": "updated_at",
@@ -126,25 +195,97 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "onUpdate": true,
+          "default": "(now())"
         }
       },
-      "indexes": {},
-      "foreignKeys": {
-        "ads_settlement_id_settlements_id_fk": {
-          "name": "ads_settlement_id_settlements_id_fk",
-          "tableFrom": "ads",
-          "tableTo": "settlements",
-          "columnsFrom": [
-            "settlement_id"
+      "indexes": {
+        "ads_ad_id_unique": {
+          "name": "ads_ad_id_unique",
+          "columns": [
+            "ad_id"
           ],
-          "columnsTo": [
-            "id"
+          "isUnique": true
+        },
+        "ads_settlement_idx": {
+          "name": "ads_settlement_idx",
+          "columns": [
+            "settlement"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "isUnique": false
+        },
+        "ads_ad_type_idx": {
+          "name": "ads_ad_type_idx",
+          "columns": [
+            "ad_type"
+          ],
+          "isUnique": false
+        },
+        "ads_property_type_idx": {
+          "name": "ads_property_type_idx",
+          "columns": [
+            "property_type"
+          ],
+          "isUnique": false
+        },
+        "ads_is_active_idx": {
+          "name": "ads_is_active_idx",
+          "columns": [
+            "is_active"
+          ],
+          "isUnique": false
+        },
+        "ads_first_seen_at_idx": {
+          "name": "ads_first_seen_at_idx",
+          "columns": [
+            "first_seen_at"
+          ],
+          "isUnique": false
+        },
+        "ads_last_seen_at_idx": {
+          "name": "ads_last_seen_at_idx",
+          "columns": [
+            "last_seen_at"
+          ],
+          "isUnique": false
+        },
+        "ads_disappeared_at_idx": {
+          "name": "ads_disappeared_at_idx",
+          "columns": [
+            "disappeared_at"
+          ],
+          "isUnique": false
+        },
+        "ads_price_idx": {
+          "name": "ads_price_idx",
+          "columns": [
+            "price"
+          ],
+          "isUnique": false
+        },
+        "ads_area_idx": {
+          "name": "ads_area_idx",
+          "columns": [
+            "area"
+          ],
+          "isUnique": false
+        },
+        "ads_latitude_idx": {
+          "name": "ads_latitude_idx",
+          "columns": [
+            "latitude"
+          ],
+          "isUnique": false
+        },
+        "ads_longitude_idx": {
+          "name": "ads_longitude_idx",
+          "columns": [
+            "longitude"
+          ],
+          "isUnique": false
         }
       },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "ads_id": {
           "name": "ads_id",
@@ -185,39 +326,26 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": false
         },
         "building_type": {
           "name": "building_type",
-          "type": "varchar(2)",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "building_material": {
           "name": "building_material",
-          "type": "varchar(2)",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "building_details_ads_id_ads_id_fk": {
-          "name": "building_details_ads_id_ads_id_fk",
-          "tableFrom": "building_details",
-          "tableTo": "ads",
-          "columnsFrom": [
-            "ads_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "building_details_id": {
           "name": "building_details_id",
@@ -256,21 +384,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "equipment_details_ads_id_ads_id_fk": {
-          "name": "equipment_details_ads_id_ads_id_fk",
-          "tableFrom": "equipment_details",
-          "tableTo": "ads",
-          "columnsFrom": [
-            "ads_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "equipment_details_id": {
           "name": "equipment_details_id",
@@ -316,21 +430,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "images_ads_id_ads_id_fk": {
-          "name": "images_ads_id_ads_id_fk",
-          "tableFrom": "images",
-          "tableTo": "ads",
-          "columnsFrom": [
-            "ads_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "images_id": {
           "name": "images_id",
@@ -376,21 +476,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "price_changes_ads_id_ads_id_fk": {
-          "name": "price_changes_ads_id_ads_id_fk",
-          "tableFrom": "price_changes",
-          "tableTo": "ads",
-          "columnsFrom": [
-            "ads_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "price_changes_id": {
           "name": "price_changes_id",
@@ -418,22 +504,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
