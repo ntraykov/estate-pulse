@@ -226,7 +226,6 @@ export class AdScraperService {
     dto.rawDetailsJson = details;
   }
 
-  /** Maps schema.org type to values that fit `CreateAdDto.propertyType` (max 50). */
   private normalizePropertyType(raw: string): string {
     const r = raw.toLowerCase().trim();
     const normalized = r.includes('house') ? 'house' : 'apartment';

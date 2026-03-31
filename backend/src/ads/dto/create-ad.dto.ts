@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -7,7 +6,6 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  Min,
 } from 'class-validator';
 
 export class CreateAdDto {

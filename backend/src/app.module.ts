@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { UsersModule } from './users/users.module';
 import { AdsModule } from './ads/ads.module';
 
 @Module({
@@ -10,7 +9,6 @@ import { AdsModule } from './ads/ads.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UsersModule,
     AdsModule,
   ],
   controllers: [],

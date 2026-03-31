@@ -3,15 +3,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1774707066304,
-      "tag": "0000_optimal_hedge_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1774707340879,
-      "tag": "0001_abnormal_zeigeist",
+      "when": 1774985325450,
+      "tag": "0000_melted_stingray",
       "breakpoints": true
     }
   ]

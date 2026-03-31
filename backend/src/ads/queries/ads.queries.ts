@@ -1,4 +1,4 @@
-import { MySql2Database, MySqlRawQueryResult } from 'drizzle-orm/mysql2';
+import { MySql2Database } from 'drizzle-orm/mysql2';
 import { Inject, Injectable } from '@nestjs/common';
 import { DRIZZLE } from 'src/database/database.module';
 import { CreateAdDto } from '../dto/create-ad.dto';
@@ -8,8 +8,8 @@ import { ads as adsSchema } from 'src/database/schema/ads.schema';
 export class AdsQueries {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database) {}
 
-  async createAd(dto: CreateAdDto): Promise<MySqlRawQueryResult> {
-    return await this.db.insert(adsSchema).values({
+  async create(dto: CreateAdDto): Promise<boolean> {
+    const result = await this.db.insert(adsSchema).values({
       adId: dto.adId,
       url: dto.url,
       settlement: dto.settlement,
@@ -27,5 +27,7 @@ export class AdsQueries {
       rawScrapedJson: dto.rawScrapedJson,
       rawHtml: dto.rawHtml,
     });
+
+    return result[0].affectedRows > 0;
   }
 }

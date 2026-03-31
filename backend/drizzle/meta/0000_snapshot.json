@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "ee8e164d-a52a-4652-933e-6ddedde2de80",
+  "id": "3491d8b9-64e7-423a-b5ea-ff8d76ce0077",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "ads_processing_queue": {
-      "name": "ads_processing_queue",
+    "ads_queue": {
+      "name": "ads_queue",
       "columns": {
         "id": {
           "name": "id",
@@ -20,21 +20,29 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "ads_processing_queue_id": {
-          "name": "ads_processing_queue_id",
+        "ads_queue_id": {
+          "name": "ads_queue_id",
           "columns": [
             "id"
           ]
         }
       },
       "uniqueConstraints": {
-        "ads_processing_queue_url_unique": {
-          "name": "ads_processing_queue_url_unique",
+        "ads_queue_url_unique": {
+          "name": "ads_queue_url_unique",
           "columns": [
             "url"
           ]
@@ -176,7 +184,7 @@
         },
         "raw_html": {
           "name": "raw_html",
-          "type": "text",
+          "type": "longtext",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -297,105 +305,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "building_details": {
-      "name": "building_details",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "ads_id": {
-          "name": "ads_id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "construction_year": {
-          "name": "construction_year",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "elevator": {
-          "name": "elevator",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": false
-        },
-        "building_type": {
-          "name": "building_type",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "building_material": {
-          "name": "building_material",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "building_details_id": {
-          "name": "building_details_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "equipment_details": {
-      "name": "equipment_details",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "ads_id": {
-          "name": "ads_id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "has_furniture": {
-          "name": "has_furniture",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "equipment_details_id": {
-          "name": "equipment_details_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "images": {
       "name": "images",
       "columns": {
@@ -500,13 +409,21 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(45)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "settlements_name_idx": {
+          "name": "settlements_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "settlements_id": {
@@ -517,59 +434,6 @@
         }
       },
       "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "users": {
-      "name": "users",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "users_id": {
-          "name": "users_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "users_email_unique": {
-          "name": "users_email_unique",
-          "columns": [
-            "email"
-          ]
-        }
-      },
       "checkConstraint": {}
     }
   },

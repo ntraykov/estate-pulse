@@ -1,8 +1,9 @@
-CREATE TABLE `ads_processing_queue` (
+CREATE TABLE `ads_queue` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`url` varchar(500) NOT NULL,
-	CONSTRAINT `ads_processing_queue_id` PRIMARY KEY(`id`),
-	CONSTRAINT `ads_processing_queue_url_unique` UNIQUE(`url`)
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT `ads_queue_id` PRIMARY KEY(`id`),
+	CONSTRAINT `ads_queue_url_unique` UNIQUE(`url`)
 );
 --> statement-breakpoint
 CREATE TABLE `ads` (
@@ -24,28 +25,11 @@ CREATE TABLE `ads` (
 	`is_active` boolean DEFAULT true,
 	`raw_details_json` json,
 	`raw_scraped_json` json,
-	`raw_html` text,
+	`raw_html` longtext,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `ads_id` PRIMARY KEY(`id`),
 	CONSTRAINT `ads_ad_id_unique` UNIQUE(`ad_id`)
-);
---> statement-breakpoint
-CREATE TABLE `building_details` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`ads_id` int NOT NULL,
-	`construction_year` int,
-	`elevator` boolean DEFAULT false,
-	`building_type` varchar(20),
-	`building_material` varchar(20),
-	CONSTRAINT `building_details_id` PRIMARY KEY(`id`)
-);
---> statement-breakpoint
-CREATE TABLE `equipment_details` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`ads_id` int NOT NULL,
-	`has_furniture` boolean NOT NULL DEFAULT false,
-	CONSTRAINT `equipment_details_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
 CREATE TABLE `images` (
@@ -66,17 +50,8 @@ CREATE TABLE `price_changes` (
 --> statement-breakpoint
 CREATE TABLE `settlements` (
 	`id` int AUTO_INCREMENT NOT NULL,
-	`name` varchar(255) NOT NULL,
+	`name` varchar(45) NOT NULL,
 	CONSTRAINT `settlements_id` PRIMARY KEY(`id`)
-);
---> statement-breakpoint
-CREATE TABLE `users` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`email` varchar(255) NOT NULL,
-	`name` varchar(255) NOT NULL,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT `users_id` PRIMARY KEY(`id`),
-	CONSTRAINT `users_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
 CREATE INDEX `ads_settlement_idx` ON `ads` (`settlement`);--> statement-breakpoint
@@ -89,4 +64,5 @@ CREATE INDEX `ads_disappeared_at_idx` ON `ads` (`disappeared_at`);--> statement-
 CREATE INDEX `ads_price_idx` ON `ads` (`price`);--> statement-breakpoint
 CREATE INDEX `ads_area_idx` ON `ads` (`area`);--> statement-breakpoint
 CREATE INDEX `ads_latitude_idx` ON `ads` (`latitude`);--> statement-breakpoint
-CREATE INDEX `ads_longitude_idx` ON `ads` (`longitude`);
+CREATE INDEX `ads_longitude_idx` ON `ads` (`longitude`);--> statement-breakpoint
+CREATE INDEX `settlements_name_idx` ON `settlements` (`name`);
