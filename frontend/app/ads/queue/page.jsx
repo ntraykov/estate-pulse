@@ -8,8 +8,8 @@ export default async function QueuePage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <h1 className="text-6xl text-center text-gray-800 mb-8 font-bold">
-        Enqueue new ad listing
+      <h1 className="text-6xl text-center mb-8 font-bold">
+        Add to the Queue
       </h1>
 
       <AdsQueue adsQueue={adsQueue} />
