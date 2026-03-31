@@ -10,19 +10,19 @@ export default function QueueTable({ adsQueue }) {
   return (
     <Card className="my-4">
       <CardContent>
-        <table className="w-full table-collapse">
+        <table className="w-full table-auto">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>URL</th>
-              <th>Created At</th>
+              <th className="px-4 py-2">ID</th>
+              <th className="px-4 py-2">URL</th>
+              <th className="px-4 py-2">Created At</th>
             </tr>
           </thead>
           <tbody>
             {adsQueue.map(item => (
               <tr key={item.id}>
-                <td className="text-center">{item.id}</td>
-                <td className="text-center">
+                <td className="text-center px-4 py-2">{item.id}</td>
+                <td className="text-center px-4 py-2">
                   <a
                     className="hover:underline"
                     href={item.url}
@@ -34,7 +34,7 @@ export default function QueueTable({ adsQueue }) {
                       : item.url}
                   </a>
                 </td>
-                <td className="text-center">{item.createdAt}</td>
+                <td className="text-center px-4 py-2">{item.createdAt}</td>
               </tr>
             ))}
           </tbody>
