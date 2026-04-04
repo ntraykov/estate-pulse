@@ -47,7 +47,9 @@ export default function RootLayout({
           >
             <main className="min-h-screen">
               <Navbar />
-              {children}
+              <div className="mx-auto w-full max-w-3xl">
+                {children}
+              </div>
             </main>
         </ThemeProvider>
       </body>

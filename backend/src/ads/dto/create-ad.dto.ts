@@ -61,11 +61,11 @@ export class CreateAdDto {
 
   @IsObject()
   @IsOptional()
-  rawDetailsJson?: Record<string, unknown>;
+  rawDetailsJson?: Record<string, string>;
 
   @IsObject()
   @IsOptional()
-  rawScrapedJson?: Record<string, unknown>;
+  rawScrapedJson?: Record<string, string>;
 
   @IsString()
   @IsOptional()

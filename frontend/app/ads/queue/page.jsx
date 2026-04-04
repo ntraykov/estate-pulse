@@ -5,10 +5,10 @@ export default async function QueuePage() {
   const adsQueue = await all()
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <>
       <h1 className="text-center mb-8 font-bold">Add to the Queue</h1>
 
       <AdsQueue adsQueue={adsQueue} />
-    </div>
+    </>
   )
 }

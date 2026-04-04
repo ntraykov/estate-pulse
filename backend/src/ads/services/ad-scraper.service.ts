@@ -31,7 +31,11 @@ export class AdScraperService {
 
     const dto = new CreateAdDto();
     dto.rawHtml = html;
-    dto.rawScrapedJson = this.buildRawScrapedJson(root, webPage, product);
+    dto.rawScrapedJson = this.buildRawScrapedJson(
+      root,
+      webPage,
+      product,
+    ) as Record<string, string>;
     this.applyWebPage(dto, webPage);
     this.applyProduct(dto, product);
 
@@ -414,7 +418,7 @@ export class AdScraperService {
       details.additionalProperty = this.jsonClone(p.additionalProperty);
     }
 
-    dto.rawDetailsJson = details;
+    dto.rawDetailsJson = details as Record<string, string>;
   }
 
   private normalizePropertyType(raw: string): string {

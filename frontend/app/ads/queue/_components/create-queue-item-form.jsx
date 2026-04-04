@@ -56,7 +56,6 @@ export default function CreateQueueItemForm({ adsQueue, setAdsQueue }) {
     try {
       const response = await create(validated.data.url)
       if (response) {
-        console.log(response)
         setAdsQueue([...adsQueue, response])
         setUrl('')
       }

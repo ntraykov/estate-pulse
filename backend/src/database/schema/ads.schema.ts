@@ -44,8 +44,8 @@ export const ads = mysqlTable(
 
     isActive: boolean('is_active').default(true),
 
-    rawDetailsJson: json('raw_details_json'),
-    rawScrapedJson: json('raw_scraped_json'),
+    rawDetailsJson: json('raw_details_json').$type<Record<string, string>>(),
+    rawScrapedJson: json('raw_scraped_json').$type<Record<string, string>>(),
 
     rawHtml: longtext('raw_html'),
 
