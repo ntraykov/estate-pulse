@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises';
 import { createHash } from 'crypto';
 import { dirname, join } from 'path';
-import { CreateAdDto } from '../dto/create-ad.dto';
+import { ScrapeAdResult } from '../dto/scrape-ad-result.dto';
 import { AdScraperService } from './ad-scraper.service';
 import { AdsQueueQueries } from '../queries/ads-queue.queries';
 import { AdsService } from './ads.service';
+import { QueueItemDto } from '../dto/queue-item.dto';
+import { ProcessedQueueItemDto } from '../dto/processed-queue-item.dto';
 
 @Injectable()
 export class AdsProcessorService {
@@ -15,31 +17,56 @@ export class AdsProcessorService {
     private readonly adsQueueQueries: AdsQueueQueries,
   ) {}
 
-  async process(): Promise<void> {
-    const queueRecord = await this.adsQueueQueries.next();
-    if (!queueRecord) {
-      return;
+  async process(id?: number | null): Promise<ProcessedQueueItemDto | null> {
+    const processedItem: ProcessedQueueItemDto | null = id
+      ? await this.processById(id)
+      : await this.processNext();
+
+    if (processedItem) {
+      await this.adsQueueQueries.deleteById(processedItem.queueItemId);
     }
 
-    await this.processAd(queueRecord.url);
+    return processedItem;
   }
 
-  private async processAd(url: string): Promise<boolean> {
-    const html = await this.downloadAd(url);
-    const fileName = await this.writeToFile(html, url);
-    const dto = await this.scrapeHtml(fileName);
+  private async processNext(): Promise<ProcessedQueueItemDto | null> {
+    const queueItem: QueueItemDto | null = await this.adsQueueQueries.next();
 
-    const success = await this.adsService.create(dto);
-    if (!success) {
-      return false;
+    return queueItem ? await this.processQueueItem(queueItem) : null;
+  }
+
+  private async processById(id: number): Promise<ProcessedQueueItemDto | null> {
+    const queueItem: QueueItemDto | null =
+      await this.adsQueueQueries.findById(id);
+
+    return queueItem ? await this.processQueueItem(queueItem) : null;
+  }
+
+  private async processQueueItem(
+    queueItem: QueueItemDto,
+  ): Promise<ProcessedQueueItemDto | null> {
+    const html = await this.downloadAd(queueItem.url);
+    const fileName = await this.writeToFile(html, queueItem.url);
+    const { dto, imageUrls } = await this.scrapeHtml(fileName);
+
+    const createdAdId: number | null = await this.adsService.create(dto);
+
+    if (createdAdId) {
+      await this.adScraperService.persistListingImages(
+        imageUrls,
+        Number(createdAdId),
+        dto.adId,
+      );
     }
 
     await unlink(fileName);
 
-    return true;
+    return createdAdId
+      ? new ProcessedQueueItemDto(createdAdId, queueItem.id)
+      : null;
   }
 
-  private async scrapeHtml(filename: string): Promise<CreateAdDto> {
+  private async scrapeHtml(filename: string): Promise<ScrapeAdResult> {
     const html = await readFile(filename, 'utf8');
 
     return this.adScraperService.scrape(html);
@@ -68,6 +95,6 @@ export class AdsProcessorService {
   private buildFileName(url: string): string {
     const hash = createHash('sha256').update(url).digest('hex');
 
-    return join(process.cwd(), 'storage', 'ads', `${hash}.html`);
+    return join(process.cwd(), 'storage', 'ads', 'unprocessed', `${hash}.html`);
   }
 }

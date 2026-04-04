@@ -33,6 +33,18 @@ export class AdsQueueQueries {
       .then(([item]) => new QueueItemDto(item.id, item.url, item.createdAt));
   }
 
+  async findById(id: number): Promise<QueueItemDto | null> {
+    const result = await this.db
+      .select()
+      .from(adsQueue)
+      .where(eq(adsQueue.id, id))
+      .limit(1);
+
+    return result[0]
+      ? new QueueItemDto(result[0].id, result[0].url, result[0].createdAt)
+      : null;
+  }
+
   async findByUrl(url: string): Promise<boolean> {
     const result = await this.db
       .select()
@@ -49,5 +61,10 @@ export class AdsQueueQueries {
     return result[0]
       ? new QueueItemDto(result[0].id, result[0].url, result[0].createdAt)
       : null;
+  }
+
+  async deleteById(id: number): Promise<boolean> {
+    const result = await this.db.delete(adsQueue).where(eq(adsQueue.id, id));
+    return result[0].affectedRows > 0;
   }
 }

@@ -11,7 +11,7 @@ export default function AdsQueue(props) {
     <>
       <CreateQueueItemForm adsQueue={adsQueue} setAdsQueue={setAdsQueue} />
 
-      <QueueTable adsQueue={adsQueue} />
+      <QueueTable adsQueue={adsQueue} setAdsQueue={setAdsQueue} />
     </>
   )
 }

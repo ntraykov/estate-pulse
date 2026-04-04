@@ -1,15 +1,23 @@
 import { CreateAdDto } from '../dto/create-ad.dto';
+import { ScrapeAdResult } from '../dto/scrape-ad-result.dto';
 import { Injectable } from '@nestjs/common';
+import { mkdir, writeFile } from 'fs/promises';
+import { join } from 'path';
+import { ImagesQueries } from '../queries/images.queries';
 
 /** Cached regex: first JSON-LD block (attribute order–tolerant). */
 const LD_JSON_SCRIPT =
   /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i;
 
+const MAX_IMAGES = 15;
+
 type JsonLdItem = Record<string, unknown>;
 
 @Injectable()
 export class AdScraperService {
-  scrape(html: string): CreateAdDto {
+  constructor(private readonly imagesQueries: ImagesQueries) {}
+
+  scrape(html: string): ScrapeAdResult {
     const root = this.parseJsonLd(html);
     const graph = root?.['@graph'];
     if (!Array.isArray(graph)) {
@@ -26,7 +34,190 @@ export class AdScraperService {
     dto.rawScrapedJson = this.buildRawScrapedJson(root, webPage, product);
     this.applyWebPage(dto, webPage);
     this.applyProduct(dto, product);
-    return dto;
+
+    const imageUrls = this.collectImageUrls(html, product);
+    return { dto, imageUrls };
+  }
+
+  /**
+   * Downloads listing images to `storage/ads/<listingAdId>/` and inserts rows into `images`
+   * (path stored in `url`, 0-based `position`).
+   */
+  async persistListingImages(
+    imageUrls: string[],
+    adsPkId: number,
+    listingAdId: string,
+  ): Promise<void> {
+    if (imageUrls.length === 0) {
+      return;
+    }
+
+    const dirName = this.sanitizeListingDirSegment(listingAdId);
+    const baseDir = join(process.cwd(), 'storage', 'ads', dirName);
+    await mkdir(baseDir, { recursive: true });
+
+    const rows: { adsId: number; url: string; position: number }[] = [];
+    let position = 0;
+
+    for (let i = 0; i < imageUrls.length; i++) {
+      const remoteUrl = imageUrls[i];
+      const downloaded = await this.downloadImageToDir(
+        remoteUrl,
+        baseDir,
+        position,
+      );
+      if (!downloaded) {
+        continue;
+      }
+      const relativePath = join('storage', 'ads', dirName, downloaded.fileName)
+        .split(/[/\\]/)
+        .join('/');
+      const storedUrl =
+        relativePath.length > 255 ? relativePath.slice(0, 255) : relativePath;
+
+      rows.push({
+        adsId: adsPkId,
+        url: storedUrl,
+        position,
+      });
+      position += 1;
+    }
+
+    if (rows.length > 0) {
+      await this.imagesQueries.insertMany(rows);
+    }
+  }
+
+  private async downloadImageToDir(
+    remoteUrl: string,
+    baseDir: string,
+    index: number,
+  ): Promise<{ fileName: string } | null> {
+    try {
+      const res = await fetch(remoteUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; EstatePulse/1.0; +https://example.invalid)',
+          Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        },
+      });
+      if (!res.ok) {
+        return null;
+      }
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length === 0) {
+        return null;
+      }
+      const ext = this.inferExtension(
+        res.headers.get('content-type'),
+        remoteUrl,
+      );
+      const fileName = `${String(index).padStart(3, '0')}.${ext}`;
+      const abs = join(baseDir, fileName);
+      await writeFile(abs, buf);
+      return { fileName };
+    } catch {
+      return null;
+    }
+  }
+
+  private inferExtension(
+    contentType: string | null,
+    remoteUrl: string,
+  ): string {
+    const ct = contentType?.toLowerCase() ?? '';
+    if (ct.includes('png')) {
+      return 'png';
+    }
+    if (ct.includes('webp')) {
+      return 'webp';
+    }
+    if (ct.includes('gif')) {
+      return 'gif';
+    }
+    if (ct.includes('jpeg') || ct.includes('jpg')) {
+      return 'jpg';
+    }
+    const lower = remoteUrl.toLowerCase();
+    if (lower.includes('.png')) {
+      return 'png';
+    }
+    if (lower.includes('.webp')) {
+      return 'webp';
+    }
+    if (lower.includes('.gif')) {
+      return 'gif';
+    }
+    return 'jpg';
+  }
+
+  private sanitizeListingDirSegment(listingAdId: string): string {
+    const s = listingAdId.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+    return s.length > 0 ? s.slice(0, 100) : 'unknown';
+  }
+
+  private collectImageUrls(html: string, product: JsonLdItem): string[] {
+    const fromLd = this.collectImageUrlsFromProduct(
+      (product as { image?: unknown }).image,
+    );
+    const fromHtml = this.collectImageUrlsFromHtml(html);
+    return this.mergeUrls([...fromLd, ...fromHtml]).slice(0, MAX_IMAGES);
+  }
+
+  private collectImageUrlsFromProduct(image: unknown): string[] {
+    const out: string[] = [];
+    const visit = (v: unknown): void => {
+      if (v == null) {
+        return;
+      }
+      if (typeof v === 'string' && v.startsWith('http')) {
+        out.push(v.trim());
+        return;
+      }
+      if (Array.isArray(v)) {
+        for (const x of v) {
+          visit(x);
+        }
+        return;
+      }
+      if (typeof v === 'object' && 'url' in v) {
+        visit((v as { url: unknown }).url);
+      }
+    };
+    visit(image);
+    return out;
+  }
+
+  private collectImageUrlsFromHtml(html: string): string[] {
+    const out: string[] = [];
+    const re =
+      /https:\/\/(?:ireland|frankfurt|fra1)\.apollo\.olxcdn\.com\/v1\/files\/[^"'\s<>]+/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(html)) !== null) {
+      let u = m[0];
+      if (u.endsWith('\\')) {
+        u = u.slice(0, -1);
+      }
+      out.push(u);
+    }
+    return out;
+  }
+
+  private mergeUrls(urls: string[]): string[] {
+    const seen = new Set<string>();
+    const merged: string[] = [];
+    for (const raw of urls) {
+      const u = raw.trim();
+      if (!u.startsWith('http')) {
+        continue;
+      }
+      if (seen.has(u)) {
+        continue;
+      }
+      seen.add(u);
+      merged.push(u);
+    }
+    return merged;
   }
 
   /** Snapshot of scraped JSON-LD for auditing / re-processing. */

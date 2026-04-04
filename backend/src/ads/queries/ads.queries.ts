@@ -8,7 +8,7 @@ import { ads as adsSchema } from 'src/database/schema/ads.schema';
 export class AdsQueries {
   constructor(@Inject(DRIZZLE) private readonly db: MySql2Database) {}
 
-  async create(dto: CreateAdDto): Promise<boolean> {
+  async create(dto: CreateAdDto): Promise<number | null> {
     const result = await this.db.insert(adsSchema).values({
       adId: dto.adId,
       url: dto.url,
@@ -28,6 +28,6 @@ export class AdsQueries {
       rawHtml: dto.rawHtml,
     });
 
-    return result[0].affectedRows > 0;
+    return result[0] ? result[0].insertId : null;
   }
 }

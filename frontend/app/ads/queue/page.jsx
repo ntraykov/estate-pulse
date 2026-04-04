@@ -1,6 +1,4 @@
 import AdsQueue from './_components/ads-queue'
-import CreateQueueItemForm from './_components/create-queue-item-form'
-import QueueTable from './_components/queue-table'
 import all from './_lib/actions/all'
 
 export default async function QueuePage() {
@@ -8,9 +6,7 @@ export default async function QueuePage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <h1 className="text-6xl text-center mb-8 font-bold">
-        Add to the Queue
-      </h1>
+      <h1 className="text-center mb-8 font-bold">Add to the Queue</h1>
 
       <AdsQueue adsQueue={adsQueue} />
     </div>
